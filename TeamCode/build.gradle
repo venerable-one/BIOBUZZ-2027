@@ -1,0 +1,60 @@
+apply plugin: 'com.android.application'
+
+//
+// build.gradle in TeamCode
+//
+// Most of the definitions for building your module reside in a common, shared
+// file 'build.common.gradle'. Being factored in this way makes it easier to
+// integrate updates to the FTC into your code. If you really need to customize
+// the build definitions, you can place those customizations in this file, but
+// please think carefully as to whether such customizations are really necessary
+// before doing so.
+
+// Custom definitions may go here
+
+// Include common definitions from above.
+apply from: '../build.common.gradle'
+apply from: '../build.dependencies.gradle'
+apply plugin: 'com.diffplug.spotless'
+
+// Formatting: run `gradlew spotlessApply` to fix, `gradlew spotlessCheck` to verify.
+// Only TeamCode is formatted; FtcRobotController is the FTC SDK and is left untouched
+// so SDK updates merge cleanly. AOSP style keeps the 4-space indent Android Studio uses.
+spotless {
+    // Files are LF; without this, core.autocrlf=true on Windows makes Spotless demand CRLF.
+    lineEndings = com.diffplug.spotless.LineEnding.UNIX
+    java {
+        target 'src/**/*.java'
+        googleJavaFormat().aosp().reflowLongStrings()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target '*.gradle'
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+android {
+    namespace = 'org.firstinspires.ftc.teamcode'
+
+    packagingOptions {
+        jniLibs.useLegacyPackaging true
+    }
+}
+
+repositories {
+    maven {
+        url "https://repo.dairy.foundation/releases" // SolversLib
+    }
+}
+
+dependencies {
+    implementation project(':FtcRobotController')
+
+    // SolversLib: command-based framework, controllers, drivebases (docs.seattlesolvers.com)
+    implementation "org.solverslib:core:0.3.6"
+}
